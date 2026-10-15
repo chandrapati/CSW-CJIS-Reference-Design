@@ -39,7 +39,8 @@ If you have already built CSW against [NIST 800-53](https://github.com/chandrapa
 | **[Evidence Boundary](CSW-CJIS-Reference-Design.md#7-evidence-boundary--what-you-must-supply-outside-csw)** | Agency LASO, compliance, CSA auditor | Know exactly what CSW evidences and what must come from elsewhere |
 | **[Evidence Checklist](docs/evidence-checklist.md)** | Evidence owner / LASO | A printable "what to export, from where, how often" worklist |
 | **[POV / Workshop Plan](docs/pov-plan.md)** | SE + agency | Run a scoped 45-day proof-of-value on one CJI boundary |
-| **[CSA Audit Response Guide](CSW-CJIS-Reference-Design.md#8-csa-audit-response-guide)** | Anyone facing an auditor | Match each likely audit question to the exact artifact — including the two questions CSW can't answer |
+| **[Platform Deployment Model](CSW-CJIS-Reference-Design.md#8-platform-deployment-model--can-csw-itself-be-saas)** | SE, agency IT, procurement | Answer "does CSW have to be on-prem, or can we use SaaS?" — with the policy's own test and the question set SaaS obliges you to work |
+| **[CSA Audit Response Guide](CSW-CJIS-Reference-Design.md#9-csa-audit-response-guide)** | Anyone facing an auditor | Match each likely audit question to the exact artifact — including the questions CSW can't answer |
 
 ---
 
@@ -117,6 +118,30 @@ Every one of these is **sanctionable today**. The full table, including the 🟠
 
 ---
 
+## Does CSW have to be on-premises, or can it be SaaS?
+
+**The policy does not require on-premises.** CJISSECPOL **§2.2** is explicitly *Architecture Independent*, and Appendix G.3 asks the question directly — "Can an Agency be compliant with the CJIS Security Policy and also cloud compute?" — and answers **yes**, "assuming the vendor of the cloud technology is able to meet the existing requirements." It then adds the constraint that matters: *"device and architecture independence permits the use of cloud computing, but the security requirements do not change."*
+
+**One test decides the burden**, and it is model-agnostic — "regardless of the implementation model – physical data center, virtual cloud solution, or a hybrid model":
+
+> unescorted logical or physical access to any information system resulting in the **ability, right, or privilege to view, modify, or make use of unencrypted CJI**
+
+The policy's own worked use cases resolve consistently: in the **IaaS** case, where the agency holds the keys, "no fingerprint-based background checks are required." In the **SaaS RMS** case, the provider *can* view and modify CJI, so personnel security applies to its staff — but **not** to the cloud provider underneath it. **Proximity to the CJI data, not the deployment model, drives the obligation.**
+
+**Where CSW lands.** CSW ingests flow metadata, process names and hashes, hostnames, software inventory, and CVE findings. It does not ingest packet payloads, criminal history records, biometrics, or case data — it describes the workloads that handle CJI rather than carrying CJI. On the policy's own test that puts CSW nearer the IaaS/PaaS cases than the SaaS-RMS case. **But the determination belongs to the agency**, the policy says so explicitly, and there are two real counterarguments (the privileged agent and enforcement path into CJI hosts; the sensitivity of enclave telemetry) that **[§8.3](CSW-CJIS-Reference-Design.md#8-platform-deployment-model--can-csw-itself-be-saas)** states plainly so you can raise them before an auditor does.
+
+| CSW deployment | Platform-compliance consequence |
+|---|---|
+| **On-premises cluster** in an agency-controlled, physically secure location | **Removes the question** — no telemetry leaves agency control, so no third-party access, addendum, or residency analysis for the platform |
+| **On-premises in agency-controlled IaaS** | Inherits G.3's IaaS case; clean where the agency controls the environment and keys |
+| **Cisco-hosted SaaS** | **Permitted**, but the agency must run the test, document the determination, and work the G.3 question set (§8.5) |
+
+> **FedRAMP does not settle it.** The policy is explicit: assurances "such as FedRAMP, StateRAMP, SOC Type 2, etc., may be leveraged, however, they **do not guarantee compliance** with the CJIS Security Policy." CJISSECPOL v6.1 contains no FedRAMP requirement of its own.
+
+**[§8.7](CSW-CJIS-Reference-Design.md#8-platform-deployment-model--can-csw-itself-be-saas)** lists the seven product facts to get from Cisco in writing — data residency, addendum willingness, CSA/FBI audit rights, screening posture, key custody, FIPS mode, and the telemetry inventory — rather than asserting any of them here.
+
+---
+
 ## What CSW does **not** cover
 
 This is the section that makes the rest of the mapping credible. Full detail in **[Reference Design §7](CSW-CJIS-Reference-Design.md#7-evidence-boundary--what-you-must-supply-outside-csw)**.
@@ -150,11 +175,12 @@ This is the section that makes the rest of the mapping credible. Full detail in 
 ## Start here
 
 1. **Confirm the policy version** your customer's CSA audits against — v5.9.5 or v6.1 (see the callout above). This determines everything downstream.
-2. Read the **[Reference Design](CSW-CJIS-Reference-Design.md)** — scope architecture, labels, and the AC-4 / SC-7 policy set.
-3. Confirm the **CJI boundary** with the agency LASO, and run the under-scoping check (query workstations, reporting caches, enclave backups).
-4. Run the **[POV plan](docs/pov-plan.md)** on that one boundary.
-5. Track exports with the **[Evidence Checklist](docs/evidence-checklist.md)**.
-6. Hand the agency the **[evidence-boundary statement](CSW-CJIS-Reference-Design.md#7-evidence-boundary--what-you-must-supply-outside-csw)** alongside the evidence — so nobody assumes CSW covered encryption, screening, or user-level access auditing.
+2. **Settle the deployment model** — on-premises or SaaS (see the section above and **[§8](CSW-CJIS-Reference-Design.md#8-platform-deployment-model--can-csw-itself-be-saas)**). If SaaS, start the §8.5 question set with Cisco now; the answers have lead time.
+3. Read the **[Reference Design](CSW-CJIS-Reference-Design.md)** — scope architecture, labels, and the AC-4 / SC-7 policy set.
+4. Confirm the **CJI boundary** with the agency LASO, and run the under-scoping check (query workstations, reporting caches, enclave backups).
+5. Run the **[POV plan](docs/pov-plan.md)** on that one boundary.
+6. Track exports with the **[Evidence Checklist](docs/evidence-checklist.md)**.
+7. Hand the agency the **[evidence-boundary statement](CSW-CJIS-Reference-Design.md#7-evidence-boundary--what-you-must-supply-outside-csw)** alongside the evidence — so nobody assumes CSW covered encryption, screening, or user-level access auditing.
 
 ---
 

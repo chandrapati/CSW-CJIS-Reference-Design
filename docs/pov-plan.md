@@ -22,6 +22,7 @@ gantt
 ## Prerequisites
 
 - The CJISSECPOL **version your CSA audits against** (see §1.2 of the Reference Design) — this determines which control set the readout is written to.
+- A settled **CSW deployment model**, on-premises or SaaS (see §8 of the Reference Design). CJIS permits either, but SaaS requires the agency to document its unescorted-access determination and work the Appendix G.3 question set — start that before day 1, not during the readout.
 - Agency **ORI**(s), and a list of systems believed to store, process, or transmit CJI.
 - Last CSA audit findings, if available, to align exports to what was actually asked for.
 - Signed CJIS Security Addenda for any vendor in scope.

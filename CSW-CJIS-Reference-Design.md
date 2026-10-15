@@ -32,6 +32,8 @@ auditors who review them.
   reality rather than a spreadsheet from last year?* (CM-8)
 - *The policy expects FIPS 140-validated encryption on CJI in transit.
   Can I at least find the paths that are still plaintext?* (§7.2)
+- *Does CSW itself have to be on-premises, or can we use the SaaS
+  offering and still pass a CJIS audit?* (§8)
 
 **What you'll need.** Your agency's ORI(s), the version of CJISSECPOL
 your CSA currently audits against (see §1.2 — this is not always the
@@ -43,8 +45,10 @@ expectations.
 applies to you. §2 maps the control families CSW addresses, with each
 row marked sanctionable or zero-cycle. §3–4 build the scope tree and the
 policy set the mapping depends on. §7 is the honest boundary: what you
-must evidence outside CSW. Go to §6 if you are assembling the evidence
-package now.
+must evidence outside CSW. **§8 answers the deployment-model question —
+whether CSW itself can be SaaS** — and is worth reading early, because
+the answer shapes the commercial conversation. Go to §6 if you are
+assembling the evidence package now.
 
 ---
 
@@ -489,7 +493,7 @@ input to the agency's remediation plan.
 
 ---
 
-## 5. Deployment Guidance by Agency Profile
+## 5. Rollout Guidance by Agency Profile
 
 | Profile | CSW configuration |
 |---|---|
@@ -580,11 +584,14 @@ it is a recurring source of mistaken assumptions in CJIS projects.
 
 ### 7.4 Deployment-model and contractual caveats
 
-- **SaaS versus on-premises matters.** If CJI is processed by a
-  cloud-hosted service, the provider typically becomes a party to a CJIS
-  Security Addendum, with the associated personnel-screening and
-  jurisdictional obligations. Confirm the deployment model before
-  mapping anything, because it changes who owns which control.
+- **SaaS versus on-premises matters — for the agency's systems and for
+  CSW itself.** If CJI is processed by a cloud-hosted service, the
+  provider may become a party to a CJIS Security Addendum, with the
+  associated personnel-screening and jurisdictional obligations.
+  Confirm the deployment model before mapping anything, because it
+  changes who owns which control. **§8 works this question through for
+  the CSW platform specifically**, including why the policy does not
+  require on-premises and what SaaS obliges you to document.
 - **There is no known official Cisco CJIS attestation for CSW.**
   Independently confirm the current position with Cisco compliance or
   product management before making any formal CJIS claim to a customer
@@ -596,7 +603,186 @@ it is a recurring source of mistaken assumptions in CJIS projects.
 
 ---
 
-## 8. CSA Audit Response Guide
+## 8. Platform Deployment Model — Can CSW Itself Be SaaS?
+
+Sections 2–7 answer "how do I use CSW to evidence the agency's
+compliance." This section answers the different and equally necessary
+question: **is the CSW platform itself acceptable in a CJIS
+environment, and does it have to be on-premises?**
+
+### 8.1 CJIS does not require on-premises
+
+The policy answers this directly. CJISSECPOL **§2.2 Architecture
+Independent** states that the policy
+
+> looks at the data and protection controls that apply regardless of
+> the implementation architecture [...] Architectural independence is
+> not intended to lessen the importance of systems, but provide for the
+> replacement of one technology with another while ensuring the controls
+> required to protect the information remain constant.
+
+Appendix G.3 (Cloud Computing) then asks and answers the question
+explicitly:
+
+> The question that is often asked is, "Can an Agency be compliant with
+> the CJIS Security Policy and also cloud compute?" Because the CJIS
+> Security Policy is device and architecture independent (per CSP
+> Section 2.2), the answer is **yes**, and this can be accomplished —
+> assuming the vendor of the cloud technology is able to meet the
+> existing requirements of the CJIS Security Policy.
+
+And it closes the point:
+
+> device and architecture independence permits the use of cloud
+> computing, **but the security requirements do not change.**
+
+So "must it be on-prem?" is **no**. The real question is what the
+deployment model costs you in obligations.
+
+### 8.2 The one test that decides the burden
+
+CJISSECPOL applies a single, consistent test, and it is model-agnostic:
+
+> Regardless of the implementation model – **physical data center,
+> virtual cloud solution, or a hybrid model** – unescorted access to
+> unencrypted CJI must be determined by the criminal and noncriminal
+> justice agency taking into consideration if those individuals have
+> unescorted logical or physical access to any information system
+> resulting in the **ability, right, or privilege to view, modify, or
+> make use of unencrypted CJI**.
+
+Personnel screening, security awareness training, and the Security
+Addendum attach to provider personnel **only when that test is met**.
+The policy's own worked use cases show how it resolves:
+
+| Policy use case | Provider access to unencrypted CJI? | Screening required of provider staff? |
+|---|---|---|
+| **IaaS** — agency runs workloads in a VPC and holds sole access to encryption keys | No | **No** — "no fingerprint-based background checks are required" |
+| **PaaS** — development platform, no CJI involved in the work | No | **No** |
+| **SaaS RMS** — provider hosts and supports the records system | **Yes** — provider can view/modify CJI in the RMS | **Yes**, for the SaaS provider's staff — but **not** for the underlying cloud provider, because the SaaS provider holds the keys |
+
+The pattern is consistent: **proximity to the CJI data, not the
+deployment model, determines the obligation.**
+
+### 8.3 Applying the test to CSW
+
+This is the analysis that matters, and it turns on what CSW actually
+ingests.
+
+| CSW ingests | CSW does **not** ingest |
+|---|---|
+| Flow metadata — 5-tuple, direction, byte/packet counts, timestamps | Packet payloads |
+| Process name, hash, parent-process chain | Criminal history record information (CHRI) |
+| Hostnames, interface IPs, OS version | Fingerprint or biometric data |
+| Installed software packages and CVE findings | Case, incident, or person records |
+| Labels/tags the agency assigns | The contents of any CJI database row |
+
+**CSW is a telemetry platform, not a CJI processing system.** It
+observes and describes the workloads that handle CJI; it does not carry
+the criminal justice information itself. On the policy's own test, that
+places CSW much closer to the **IaaS/PaaS** use cases than to the
+**SaaS RMS** use case — the determinative factor in that third row was
+that the provider could "view, modify, or make use of unencrypted CJI
+**within the RMS**," which is not what a flow record is.
+
+**The counterarguments, stated honestly.** A conservative CSA may
+still push back, and on two grounds worth preparing for:
+
+1. **The agent is privileged and the enforcement path writes to CJI
+   hosts.** CSW enforcement programs host firewall rules on in-scope
+   workloads. The policy's test includes the word *modify*, and although
+   the clause qualifies it as modifying *unencrypted CJI* rather than
+   the system, an auditor may read the control-plane path to a CJI host
+   broadly. Expect to explain who at Cisco can reach that path and under
+   what controls.
+2. **Enclave telemetry is sensitive even when it is not CJI.**
+   Hostnames, usernames, and process inventory from the CJI enclave
+   describe the architecture protecting CJI. Not CJI by definition —
+   but some CSAs treat it conservatively, and the argument is easier to
+   win when you raise it first.
+
+**The determination is not Cisco's to make and not this document's.**
+The policy assigns it to the agency: unescorted access "must be
+determined by the criminal and noncriminal justice agency." Use this
+section to frame that conversation with the CSA — do not present it as
+a settled answer.
+
+### 8.4 What each deployment model costs you
+
+| CSW deployment | Platform-compliance consequence |
+|---|---|
+| **On-premises cluster** (physical or virtual appliance), in an agency-controlled, physically secure location | **Removes the question.** No telemetry leaves agency control, so there is no third-party access analysis, no addendum question, and no data-residency question for the platform. The cleanest answer when the CSA is conservative or the agency is risk-averse. |
+| **On-premises, hosted in agency-controlled IaaS** | Inherits the G.3 IaaS use case. Clean provided the agency controls the environment and keys. |
+| **Cisco-hosted SaaS** | **Permitted by the policy, but you must do the work in §8.5.** Telemetry about CJI systems leaves the agency, so the agency must run the §8.2 test, document the determination, and put the contractual terms in place. |
+
+If the customer's CSA is strict, or the agency simply wants the
+shortest path through its audit, **on-premises is the low-friction
+choice** — not because SaaS is non-compliant, but because on-premises
+makes the entire §8.5 question set moot.
+
+### 8.5 If the customer chooses SaaS — the Appendix G.3 question set
+
+These are the questions Appendix G.3 directs a cloud subscriber to ask
+*before* entering an agreement, mapped to who must answer them for a
+CSW SaaS deployment. Work this list with the agency and Cisco before
+committing.
+
+| G.3 question | Control | Who answers |
+|---|---|---|
+| Does access to the platform constitute remote access? | AC-17, MA-4 | Agency, with Cisco's access model as input |
+| Is MFA required and enforced for platform access? | IA-2 | Agency (its own admins) + Cisco (its support access) |
+| Do the provider datacenters meet physically-secure-location requirements? | PE | Cisco |
+| Are encryption requirements met, in transit and at rest — **and who holds the keys?** | SC-13, SC-28 | Cisco; the key-holder answer drives the §8.2 determination |
+| What are the provider's incident response and subscriber-notification procedures? | IR | Cisco |
+| Is the provider a private contractor subject to screening and agreement requirements? | CA-3, SA-9, PS-3 | Agency's determination, Cisco's willingness |
+| **Will the provider allow the CSA and FBI to conduct compliance and security audits?** | — | Cisco |
+| How are event and content logging handled, and provided on request? | AU | Cisco |
+| What are the provider's media protection and destruction responsibilities? | MP | Cisco |
+
+The audit-rights question is the one that most often stalls a cloud
+deal, because G.3 is explicit that cloud facilities storing or
+processing CJI "should be audited as would any other datacenter housing
+and processing CJI." Raise it early rather than at contract signature.
+
+### 8.6 FedRAMP, StateRAMP, and SOC 2 do not settle it
+
+A frequent and understandable shortcut — "the service is FedRAMP
+authorized, so we're fine" — is explicitly rejected by the policy:
+
+> the CJIS Security Policy sets the minimum requirements for the
+> protection of CJI. Additional security assurances from other
+> authorizations such as **FedRAMP, StateRAMP, SOC Type 2, etc., may be
+> leveraged, however, they do not guarantee compliance with the CJIS
+> Security Policy.**
+
+Treat any such authorization as helpful supporting evidence that
+shortens the conversation, never as the answer. Note also that
+CJISSECPOL v6.1 contains **no FedRAMP requirement** of its own — so an
+agency asking "is it FedRAMP'd?" is asking a question the policy does
+not actually pose.
+
+### 8.7 Confirm with Cisco before answering a customer
+
+The following are **product facts this document deliberately does not
+assert.** Get them from Cisco product management or compliance in
+writing for the customer's specific version and region:
+
+- [ ] CSW SaaS **data residency** — where telemetry is stored and processed, and whether US-only processing is available
+- [ ] Whether Cisco will **sign a CJIS Security Addendum** for a CSW SaaS engagement
+- [ ] Whether Cisco will accept **CSA/FBI audit rights** against the SaaS environment
+- [ ] Cisco's **personnel screening** posture for staff with SaaS control-plane access
+- [ ] The **encryption and key-custody model** for telemetry at rest in SaaS
+- [ ] CSW **FIPS mode** for agent-to-cluster communication (see §7.2)
+- [ ] The **exact telemetry inventory** for the deployed version — the §8.3 argument depends on CSW not ingesting CJI, so confirm it rather than assume it
+
+As stated in §7.4, **there is no known official Cisco CJIS attestation
+for CSW**, and no product attestation exists under this policy in any
+case. Nothing in this section should be represented to a customer or
+auditor as one.
+
+---
+
+## 9. CSA Audit Response Guide
 
 | If the auditor asks… | Produce |
 |---|---|
@@ -608,6 +794,8 @@ it is a recurring source of mistaken assumptions in CJIS projects.
 | "You have an unpatched critical CVE on a CJI server." | Vulnerability + reachability report showing whether the service is reachable, plus the compensating policy |
 | "Is CJI encrypted in transit?" | **Not a CSW answer** — the TLS/VPN evidence. CSW supplies the plaintext-path report as supporting input (§7.2) |
 | "Who looked up this person's criminal history?" | **Not a CSW answer** — application and database audit logs (§7.3) |
+| "Your security tool is cloud-hosted. Is that allowed?" | §8.1 — the policy is architecture-independent and permits cloud; then your documented §8.2 determination and the §8.5 question set |
+| "Does the vendor have access to our CJI?" | §8.3 — the telemetry inventory showing CSW ingests flow and process metadata, not CJI, plus Cisco's written confirmation per §8.7 |
 
 ---
 
