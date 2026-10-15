@@ -614,7 +614,7 @@ it is a recurring source of mistaken assumptions in CJIS projects.
 ## Related Frameworks
 
 - [NIST SP 800-53 Rev 5](https://github.com/chandrapati/CSW-NIST-800-53-Reference-Design) — the parent control catalog; CJISSECPOL v6.x is organized around these families, so this is the primary reuse path.
-- [CJIS is frequently paired with CISA ZTMM](https://github.com/chandrapati/CSW-CISA-ZTMM-Reference-Design) — for agencies pursuing zero trust alongside CJIS compliance.
+- [CISA ZTMM v2.0](https://github.com/chandrapati/CSW-CISA-ZTMM-Reference-Design) — frequently paired with CJIS by agencies pursuing zero trust alongside compliance.
 - [NIST CSF 2.0](https://github.com/chandrapati/CSW-CSF-Reference-Design) — the governance wrapper many state agencies use above CJIS.
 - [CIS Controls v8.1](https://github.com/chandrapati/CSW-CIS-Reference-Design) — IG1/IG2 safeguards map closely to the Priority 1 set and suit smaller agencies.
 - [FIPS 140](https://github.com/chandrapati/CSW-Compliance-Reference-Designs/blob/main/FIPS-140/CSW-FIPS-Technical-Runbook.md) — the cryptographic-module requirement referenced in §7.2.
