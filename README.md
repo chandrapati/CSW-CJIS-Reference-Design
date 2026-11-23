@@ -36,6 +36,7 @@ If you have already built CSW against [NIST 800-53](https://github.com/chandrapa
 | Document | For | Use it to |
 |---|---|---|
 | **[Reference Design](CSW-CJIS-Reference-Design.md)** | SE / platform / security engineering | Build CSW end-to-end: scope architecture, labels, ADM, policy, enforcement, per-control evidence with Priority markings |
+| **Compliance Report** ([PDF](CSW-CJIS-Compliance-Report.pdf) · [DOCX](CSW-CJIS-Compliance-Report.docx)) | Agency compliance team, CSA auditor, exec | Hand to your auditor: control-family mapping, the evidence package, and the boundary stated plainly |
 | **[Evidence Boundary](CSW-CJIS-Reference-Design.md#7-evidence-boundary--what-you-must-supply-outside-csw)** | Agency LASO, compliance, CSA auditor | Know exactly what CSW evidences and what must come from elsewhere |
 | **[Evidence Checklist](docs/evidence-checklist.md)** | Evidence owner / LASO | A printable "what to export, from where, how often" worklist |
 | **[POV / Workshop Plan](docs/pov-plan.md)** | SE + agency | Run a scoped 45-day proof-of-value on one CJI boundary |
