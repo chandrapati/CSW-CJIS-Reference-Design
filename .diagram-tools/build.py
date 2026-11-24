@@ -27,3 +27,11 @@ body = diagrams.evidence_workflow(spec)
 p = render.render(render.page(body, base_css(), diagrams.W, h),
                   OUT / "csw-evidence-workflow.png", diagrams.W, h)
 print(f"  csw-evidence-workflow.png  {diagrams.W}x{h}  {os.path.getsize(p) // 1024} KB")
+
+
+# The scope-architecture graphic lives in its own script, so run it from here too.
+import os as _os
+import runpy as _runpy
+
+_runpy.run_path(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "build_tree.py"),
+                run_name="__main__")

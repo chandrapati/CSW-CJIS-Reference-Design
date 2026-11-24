@@ -328,6 +328,9 @@ where CSW produces nothing are enumerated in §7.
 ## 3. Scope Architecture and Labeling
 
 The control mapping above is only auditable against a named boundary.
+
+![CJIS scope architecture — the recommended CSW scope hierarchy, with label-driven membership so the boundary stays current](assets/csw-scope-architecture.png)
+
 For CJIS that boundary is unusually concrete — the CSA will ask which
 systems store, process, or transmit CJI — but it is also frequently
 undocumented, because in many agencies the records system, the CAD
